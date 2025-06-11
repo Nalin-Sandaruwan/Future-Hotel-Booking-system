@@ -16,7 +16,7 @@ dotenv.config({ path: './config.env' })
 
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/blog', {
+mongoose.connect('mongodb://localhost:27017/', {
 }).then(() => {
     console.log('mongo is connectd...')
 }).catch((e) => {
