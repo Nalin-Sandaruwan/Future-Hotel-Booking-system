@@ -1,4 +1,4 @@
-const User = require('../Models/User');
+const User = require('../Models/User'); // Adjust the path as necessary
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const CatchAsync = require('../Utili/CatchAsync');
@@ -35,12 +35,11 @@ exports.signup = CatchAsync(async (req, res) => {
      const token = createToken(newUser._id)
      res.status(201).json({ status: 'success', message:'New user Created ', token:token })
 
-
 })
 
 //Login
 exports.login = CatchAsync(async(req, res)=>{
-     
+
      const {email, password } = req.body;
 
      if (!email || !password) {
@@ -49,7 +48,8 @@ exports.login = CatchAsync(async(req, res)=>{
      const user = await User.findOne({ email });
      if (!user) {
           return res.status(400).json({message: 'Invalid email or password'});
-     }
+     } 
+     
      const isMatch = await bcrypt.compare(password, user.password);
 
      if (!isMatch) {
@@ -60,3 +60,4 @@ exports.login = CatchAsync(async(req, res)=>{
      res.status(200).json({ status: 'success', message: 'User logged in successfully', token: token });
 
 })
+
