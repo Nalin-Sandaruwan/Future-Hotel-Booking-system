@@ -23,7 +23,12 @@ const UserSchema = new mongoose.Schema({
      password: {
           type: String,
           required: true,
-          maxlength: [8, 'Password must be at most 100 characters long']
+          maxlength: [100, 'Password must be at most 100 characters long']
+     },
+     role: {
+          type: String,
+          enum: ['user', 'admin'],
+          default: 'user'
      },
 
 })

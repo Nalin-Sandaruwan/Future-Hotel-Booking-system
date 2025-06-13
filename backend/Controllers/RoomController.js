@@ -15,8 +15,6 @@ exports.getRoomByID = CatchAsync(async (req, res, next) => {
 
     const room = await Rooms.findById(roomId);
 
-    
-
     if (!room) {
         return next(new AppError('No room found with that ID', 404));
     }
@@ -29,16 +27,16 @@ exports.getRoomByID = CatchAsync(async (req, res, next) => {
 
 // creating a new room
 exports.createRoom = CatchAsync(async (req, res, next) => {
-     const newRoom = await Rooms.create(req.body);
+    const newRoom = await Rooms.create(req.body);
 
-     if (!newRoom) { 
-          return next(new AppError('Failed to create room', 400));
-     }
+    if (!newRoom) {
+        return next(new AppError('Failed to create room', 400));
+    }
 
-     res.status(201).json({
-          status: 'success',
-          Data: newRoom
-     });
+    res.status(201).json({
+        status: 'success',
+        Data: newRoom
+    });
 
 
 });
