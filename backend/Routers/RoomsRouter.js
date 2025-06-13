@@ -16,6 +16,7 @@ router.route('/')
      // Ensure the JWT is included in the Authorization header with the Bearer scheme when making a POST request to this route.
 
 router.route('/:id')
-     .get(AuthMiddleware.protect, AuthMiddleware.restrictTo('user'), RoomController.getRoomByID);
+     .get(AuthMiddleware.protect, AuthMiddleware.restrictTo('user'), RoomController.getRoomByID)
+     .patch(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.updateRoom);
 
 module.exports = router;
