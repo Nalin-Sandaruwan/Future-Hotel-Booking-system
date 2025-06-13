@@ -7,7 +7,7 @@
 // module.exports = router;
 const express = require('express');
 const RoomController = require('../Controllers/RoomController');
-const AuthMiddleware = require('../Middelwares/AuthMiddelware');
+const AuthMiddleware = require('../Utili/AuthMiddelware');
 
 const router = express.Router();
 

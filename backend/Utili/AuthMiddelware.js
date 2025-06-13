@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../Models/User');
-const CatchAsync = require('../Utili/CatchAsync');
-const AppError = require('../Utili/AppError');
+const CatchAsync = require('./CatchAsync');
+const AppError = require('./AppError');
 
 exports.protect = CatchAsync(async (req, res, next) => {
-     
+
      let token;
 
      // Check if the token is provided in the headers
@@ -17,9 +17,9 @@ exports.protect = CatchAsync(async (req, res, next) => {
      const user = await User.findById(decoded.userId);
 
      if(!user){
-          return res.status(401).json({ message: 'User not found' });
+          return next(new AppError('The user belonging to this token does no longer exist', 401));
      }
-
+     
      req.user = user;
      next();
 

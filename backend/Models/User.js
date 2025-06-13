@@ -30,6 +30,9 @@ const UserSchema = new mongoose.Schema({
           enum: ['user', 'admin'],
           default: 'user'
      },
+     resetCode:String,
+     resetExpires:Date,
+
 
 })
 
