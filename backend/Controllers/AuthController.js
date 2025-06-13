@@ -138,7 +138,7 @@ exports.resetPassword = CatchAsync(async (req, res, next) => {
      user.resetExpires = undefined;
      await user.save();
 
-     res.status(200).json({
+     res.status(200).json({ 
           status: 'success',
           message: 'Password reset successfully'
      });

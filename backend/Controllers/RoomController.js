@@ -55,3 +55,21 @@ exports.updateRoom = CatchAsync(async(req, res, next)=>{
     }
     res.status(200).json({status: 'success', message: 'Room updated successfully', data:foundRoom})
 })
+
+// delete room 
+exports.deleteRoom = CatchAsync(async(req, res, next) => {
+  const roomId = req.params.id;
+  const foundedRoom = await Rooms.findByIdAndDelete(roomId)
+
+  const deletedRoom = await Rooms.findById(roomId)
+
+  if (deletedRoom) {
+    return next(new AppError('Not deleted the room data', ))
+  }
+})
+
+// get all room
+exports.getAllRooms = CatchAsync(async(req, res, next) => {
+  const roomId = req.params.id;
+  const allRoomsData = await Rooms.find
+})

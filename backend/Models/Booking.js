@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const BookingSchema = new mongoose.Schema({
+
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
+    
     roomId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
