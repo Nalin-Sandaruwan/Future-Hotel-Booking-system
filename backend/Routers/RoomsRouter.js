@@ -12,11 +12,13 @@ const AuthMiddleware = require('../Utili/AuthMiddelware');
 const router = express.Router();
 
 router.route('/')
-     .post(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.createRoom);
+     .post(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.createRoom)
+     .get( RoomController.getAllRooms);
      // Ensure the JWT is included in the Authorization header with the Bearer scheme when making a POST request to this route.
 
 router.route('/:id')
      .get(AuthMiddleware.protect, AuthMiddleware.restrictTo('user'), RoomController.getRoomByID)
-     .patch(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.updateRoom);
+     .patch(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.updateRoom)
+     .delete(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.deleteRoom)
 
 module.exports = router;

@@ -89,16 +89,21 @@ exports.forgetPassword = CatchAsync(async (req, res, next) => {
      // Here you would send the OTP to the user's email
      const message = ` This is your OTP for password reset : ${otp}. It is valid for 10 minutes.`;
 
-     await sendEmail({
-          email: user.email,
-          subject: 'Your Password Reset OTP',
-          message: message
-     })
-
      res.status(200).json({
           status: 'success',
-          message: 'OTP sent to your email. Please check your inbox.'
+          message: 'OTP sent to your email. Please check your inbox.',
+          otp: otp // For testing purposes, you might want to remove this in production
      });
+     // await sendEmail({
+     //      email: user.email,
+     //      subject: 'Your Password Reset OTP',
+     //      message: message
+     // })
+
+     // res.status(200).json({
+     //      status: 'success',
+     //      message: 'OTP sent to your email. Please check your inbox.'
+     // });
 });
 
 

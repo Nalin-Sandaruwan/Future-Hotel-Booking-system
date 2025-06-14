@@ -70,6 +70,14 @@ exports.deleteRoom = CatchAsync(async(req, res, next) => {
 
 // get all room
 exports.getAllRooms = CatchAsync(async(req, res, next) => {
-  const roomId = req.params.id;
-  const allRoomsData = await Rooms.find
+  
+  const allRoomsData = await Rooms.find();
+  if (!allRoomsData || allRoomsData.length === 0) {
+    return next(new AppError('No rooms found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: allRoomsData
+  });
 })
