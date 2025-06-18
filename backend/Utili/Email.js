@@ -9,7 +9,7 @@ const sendEmail = async (options) => {
             user:process.env.EMAIL_USER,
             pass:process.env.EMAIL_PASS
         }
-    })
+    });
 
     //Difine the Email option
     const mailOptions = {
@@ -20,7 +20,7 @@ const sendEmail = async (options) => {
     }
 
     //Actualy send the Email
-    await transporter.sendMail(mailOptions)
-}
+    await transporter.sendMail(mailOptions);
+};
 
 module.exports = sendEmail;

@@ -8,7 +8,7 @@ const sendEmail = require('../Utili/Email');
 const createToken = (userId) => {
      const playload = { userId }; // playload is obj
      const jwt_Secret = process.env.JWT_SECRET
-     return jwt.sign(playload, jwt_Secret, { expiresIn: '1h' })
+     return jwt.sign( playload, jwt_Secret, { expiresIn: '1h' })
 }
 
 exports.signup = CatchAsync(async (req, res, next) => {
@@ -93,6 +93,7 @@ exports.forgetPassword = CatchAsync(async (req, res, next) => {
           status: 'success',
           message: 'OTP sent to your email. Please check your inbox.',
           otp: otp // For testing purposes, you might want to remove this in production
+          
      });
      // await sendEmail({
      //      email: user.email,

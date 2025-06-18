@@ -14,6 +14,7 @@ const BookingSchema = new mongoose.Schema({
         ref: 'Room',
         required: true
     },
+    
     startDate: {
         type: Date,
         required: true

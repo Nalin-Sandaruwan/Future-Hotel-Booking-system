@@ -54,7 +54,7 @@ exports.updateRoom = CatchAsync(async(req, res, next)=>{
         return next(new AppError('No room Found with that Id ', 404));
     }
     res.status(200).json({status: 'success', message: 'Room updated successfully', data:foundRoom})
-})
+});
 
 // delete room 
 exports.deleteRoom = CatchAsync(async(req, res, next) => {
@@ -66,7 +66,7 @@ exports.deleteRoom = CatchAsync(async(req, res, next) => {
   if (deletedRoom) {
     return next(new AppError('Not deleted the room data', ))
   }
-})
+});
 
 // get all room
 exports.getAllRooms = CatchAsync(async(req, res, next) => {
@@ -74,10 +74,11 @@ exports.getAllRooms = CatchAsync(async(req, res, next) => {
   const allRoomsData = await Rooms.find();
   if (!allRoomsData || allRoomsData.length === 0) {
     return next(new AppError('No rooms found', 404));
-  }
+  };
 
   res.status(200).json({
     status: 'success',
     data: allRoomsData
   });
-})
+
+});
