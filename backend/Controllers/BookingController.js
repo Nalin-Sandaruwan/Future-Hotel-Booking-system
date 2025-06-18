@@ -1,26 +1,36 @@
 const Booking = require('../Models/Booking');
 const CatchAsync = require('../Utili/CatchAsync');
-const APIFeatures = require('../Utili/APIFeatures');
+const APIFeatures = require('../Utili/ApiFeature');
 const AppError = require('../Utili/AppError');
+const mongoose = require('mongoose');
+
 
 // check the booking is already exist or not middelware I build
 exports.checkBookingExists = CatchAsync(async (req, res, next) => {
-     const { checkIn, checkOut, roomId } = req.body;
+     const { roomId, startDate, endDate } = req.body;
      // Validate required fields
-     if (!checkIn || !checkOut || !roomId) {
+     if (!roomId || !startDate || !endDate) {
           return res.status(400).json({
                status: 'fail',
                message: 'Missing required fields'
           });
      }
 
-     const checkInDate = new Date(checkIn);
-     const checkOutDate = new Date(checkOut);
+     // Check if roomId is a valid ObjectId
+     if (!mongoose.Types.ObjectId.isValid(roomId)) {
+          return res.status(400).json({
+               status: 'fail',
+               message: 'Invalid roomId'
+          });
+     }
+
+     const start = new Date(startDate);
+     const end = new Date(endDate);
 
      const existingBooking = await Booking.findOne({
           roomId,
-          startDate: { $lt: checkOutDate },
-          endDate: { $gt: checkInDate },
+          startDate: { $lt: end },
+          endDate: { $gt: start },
           status: { $in: ['pending', 'confirmed'] }
      });
 
@@ -35,6 +45,13 @@ exports.checkBookingExists = CatchAsync(async (req, res, next) => {
 
 exports.createBooking = CatchAsync(async (req, res, next) => {
      const { roomId, startDate, endDate } = req.body;
+
+     if (!req.user) {
+          return res.status(401).json({
+               status: 'fail',
+               message: 'User not authenticated'
+          });
+     }
      const userId = req.user._id; // Assuming user ID is stored in req.user
      
      this.checkBookingExists(req, res, next); // Call the middleware to check for existing bookings
