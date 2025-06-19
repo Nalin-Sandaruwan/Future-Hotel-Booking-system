@@ -8,8 +8,8 @@ router.route('/')
 .get(AuthMiddleware.protect, BookingController.getAllBookings);
 
 router.route('/:id')
-.get(BookingController.getBookingById)
-.put(BookingController.updateBooking)
-.delete(BookingController.deleteBooking);
+.get( AuthMiddleware.protect , AuthMiddleware.restrictTo('admin'), BookingController.getBookingById)
+.put( AuthMiddleware.protect , AuthMiddleware.restrictTo('admin'), BookingController.updateBooking)
+.delete( AuthMiddleware.protect , AuthMiddleware.restrictTo('admin'), BookingController.deleteBooking);
 
 module.exports = router;
