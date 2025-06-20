@@ -10,9 +10,9 @@ exports.createPayment = CatchAsync(async (req, res, next) => {
 
   // Verify booking exists
   const booking = await Booking.findById(bookingId);
-  if (!booking) {
-    return next(new AppError('No booking found with that ID', 404));
-  }
+  // if (!booking) {
+  //   return next(new AppError('No booking found with that ID', 404));
+  // }
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -37,10 +37,13 @@ exports.createPayment = CatchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
+      allData :session,
       sessionId: session.id,
       url: session.url,
     },
+    
   });
+  // {"status":"success","data":{"allData":{"id":"cs_test_a1n96Pq9TIAOR4cTRLdXyrmJcE6Q4Atqhu0lHwyDOfUsyfFCQqGY6nY9VO","object":"checkout.session","adaptive_pricing":{"enabled":true},"after_expiration":null,"allow_promotion_codes":null,"amount_subtotal":500000,"amount_total":500000,"automatic_tax":{"enabled":false,"liability":null,"provider":null,"status":null},"billing_address_collection":null,"cancel_url":"http://127.0.0.1:3000/cancel","client_reference_id":"614f3ef5a6d34b001f1c441c","client_secret":null,"collected_information":null,"consent":null,"consent_collection":null,"created":1750436570,"currency":"lkr","currency_conversion":null,"custom_fields":[],"custom_text":{"after_submit":null,"shipping_address":null,"submit":null,"terms_of_service_acceptance":null},"customer":null,"customer_creation":"if_required","customer_details":null,"customer_email":null,"discounts":[],"expires_at":1750522970,"invoice":null,"invoice_creation":{"enabled":false,"invoice_data":{"account_tax_ids":null,"custom_fields":null,"description":null,"footer":null,"issuer":null,"metadata":{},"rendering_options":null}},"livemode":false,"locale":null,"metadata":{},"mode":"payment","payment_intent":null,"payment_link":null,"payment_method_collection":"if_required","payment_method_configuration_details":null,"payment_method_options":{"card":{"request_three_d_secure":"automatic"}},"payment_method_types":["card"],"payment_status":"unpaid","permissions":null,"phone_number_collection":{"enabled":false},"recovered_from":null,"saved_payment_method_options":null,"setup_intent":null,"shipping_address_collection":null,"shipping_cost":null,"shipping_options":[],"status":"open","submit_type":null,"subscription":null,"success_url":"http://127.0.0.1:3000/success","total_details":{"amount_discount":0,"amount_shipping":0,"amount_tax":0},"ui_mode":"hosted","url":"https://checkout.stripe.com/c/pay/cs_test_a1n96Pq9TIAOR4cTRLdXyrmJcE6Q4Atqhu0lHwyDOfUsyfFCQqGY6nY9VO#fidkdWxOYHwnPyd1blpxYHZxWjA0V2YyTmtUQFE9bDQzc09yV2ppaEdXNXJySlZ8QmlyMmBEMTBSSUIzRE4xSTZcfVxsd2pHMEk3VUN8X09TUW5nU1JfY250TH1QfXViZG00XX9SYmdsaDd3NTV%2FREZcfU9HTScpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl","wallet_options":null},"sessionId":"cs_test_a1n96Pq9TIAOR4cTRLdXyrmJcE6Q4Atqhu0lHwyDOfUsyfFCQqGY6nY9VO","url":"https://checkout.stripe.com/c/pay/cs_test_a1n96Pq9TIAOR4cTRLdXyrmJcE6Q4Atqhu0lHwyDOfUsyfFCQqGY6nY9VO#fidkdWxOYHwnPyd1blpxYHZxWjA0V2YyTmtUQFE9bDQzc09yV2ppaEdXNXJySlZ8QmlyMmBEMTBSSUIzRE4xSTZcfVxsd2pHMEk3VUN8X09TUW5nU1JfY250TH1QfXViZG00XX9SYmdsaDd3NTV%2FREZcfU9HTScpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"}}
 });
 
 exports.stripeWebhook = CatchAsync(async (req, res, next) => {
