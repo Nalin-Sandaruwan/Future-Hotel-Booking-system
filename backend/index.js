@@ -33,6 +33,7 @@ mongoose.connect('mongodb://localhost:27017/Hottel-Booking', {
 app.use('/api/v1/rooms', RoomsRouter);
 app.use('/api/v1/users', UserRouter);
 app.use('/api/v1/bookings', BookingRouter);
+app.use('/api/v1/payments', require('./Routers/PaymentRouter'));
 
 
 
