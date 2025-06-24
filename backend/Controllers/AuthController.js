@@ -5,11 +5,38 @@ const CatchAsync = require('../Utili/CatchAsync');
 const AppError = require('../Utili/AppError');
 const sendEmail = require('../Utili/Email');
 
+
 const createToken = (userId) => {
      const playload = { userId }; // playload is obj
      const jwt_Secret = process.env.JWT_SECRET
-     return jwt.sign( playload, jwt_Secret, { expiresIn: '1h' })
+     return jwt.sign(playload, jwt_Secret, { expiresIn: '1h' })
 }
+
+
+const createSendToken = (user, statusCode, res) => {
+     const token = createToken(user._id);
+     const cookieOptions = {
+          httpOnly: true,
+          secure: false, // only send over HTTPS
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+          sameSite: 'lax'
+     };
+
+     res.cookie('jwtToken', token, cookieOptions);
+
+     // Remove password from output
+     user.password = undefined;
+     console.log(cookieOptions);
+
+     res.status(statusCode).json({
+          status: 'success',
+          token,
+          data: {
+               user
+          }
+     });
+};
+
 
 exports.signup = CatchAsync(async (req, res, next) => {
      const { name, email, password, confirmPassword } = req.body;
@@ -34,8 +61,7 @@ exports.signup = CatchAsync(async (req, res, next) => {
           password: hashedPassword
      })
 
-     const token = createToken(newUser._id)
-     res.status(201).json({ status: 'success', message: 'New user Created ', token: token })
+     createSendToken(newUser, 201, res)
 
 })
 
@@ -58,18 +84,21 @@ exports.login = CatchAsync(async (req, res, next) => {
           return next(new AppError('Invalid email or password', 400));
      }
 
-     const token = createToken(user._id);
-     res.status(200).json({ status: 'success', message: 'User logged in successfully', token: token });
+
+     createSendToken(user, 200, res)
+
 
 })
 
 
 //forget Password
 exports.forgetPassword = CatchAsync(async (req, res, next) => {
+
      const { email } = req.body;
      if (!email) {
           return next(new AppError('Email is required', 400));
      }
+
      const user = await User.findOne({ email });
      if (!user) {
           return next(new AppError('No user found with that email', 404));
@@ -93,7 +122,7 @@ exports.forgetPassword = CatchAsync(async (req, res, next) => {
           status: 'success',
           message: 'OTP sent to your email. Please check your inbox.',
           otp: otp // For testing purposes, you might want to remove this in production
-          
+
      });
      // await sendEmail({
      //      email: user.email,
@@ -136,15 +165,15 @@ exports.resetPassword = CatchAsync(async (req, res, next) => {
      if (newPassword !== confirmPassword) {
           return next(new AppError('Password and confirm password do not match', 400));
      }
-     
 
-// save the new password and new data
+
+     // save the new password and new data
      user.password = await bcrypt.hash(newPassword, 12);
      user.resetCode = undefined;
      user.resetExpires = undefined;
      await user.save();
 
-     res.status(200).json({ 
+     res.status(200).json({
           status: 'success',
           message: 'Password reset successfully'
      });

@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(bodyParser.urlencoded())
 
 // parse application/json
 app.use(bodyParser.json())
+app.use(cookieParser())
 
 //dot env configaration
 dotenv.config({ path: './config.env' })
