@@ -10,9 +10,9 @@ exports.createPayment = CatchAsync(async (req, res, next) => {
 
   // Verify booking exists
   const booking = await Booking.findById(bookingId);
-  // if (!booking) {
-  //   return next(new AppError('No booking found with that ID', 404));
-  // }
+  if (!booking) {
+    return next(new AppError('No booking found with that ID', 404));
+  }
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],

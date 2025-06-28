@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
           minlength: 3,
           maxlength: 50
      },
+
      email: {
           type: String,
           required: true,
@@ -17,9 +18,9 @@ const UserSchema = new mongoose.Schema({
                validator: validator.isEmail,
                message: 'Invalid email format'
           },
-          required: [true, 'Email is required'],
           unique: true,
      },
+     
      password: {
           type: String,
           required: true,
@@ -28,7 +29,7 @@ const UserSchema = new mongoose.Schema({
      role: {
           type: String,
           enum: ['user', 'admin'],
-          default: 'user'
+          default: 'admin'
      },
      resetCode:String,
      resetExpires:Date,

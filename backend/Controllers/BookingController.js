@@ -54,7 +54,7 @@ exports.createBooking = CatchAsync(async (req, res, next) => {
      }
      const userId = req.user._id; // Assuming user ID is stored in req.user
      
-     this.checkBookingExists(req, res, next); // Call the middleware to check for existing bookings
+     checkBookingExists(req, res, next); // Call the middleware to check for existing bookings
      const newBooking = await Booking.create({
           userId,
           roomId,

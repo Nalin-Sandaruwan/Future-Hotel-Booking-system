@@ -4,7 +4,7 @@ class ApiFeature {
           this.queryString = queryString;
      }
 
-     filter() {
+    filter() {
     //1 BUILD QUERY remove unrelated for filtering queries other queries
     const queryObj = { ...this.queryString };
     const excludeFields = ['page', 'sort', 'limit', 'fields'];

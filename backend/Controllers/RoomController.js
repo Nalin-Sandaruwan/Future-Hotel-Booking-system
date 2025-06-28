@@ -64,7 +64,7 @@ exports.deleteRoom = CatchAsync(async(req, res, next) => {
   const deletedRoom = await Rooms.findById(roomId)
 
   if (deletedRoom) {
-    return next(new AppError('Not deleted the room data', ))
+    return next(new AppError('Not deleted the room data', 400))
   }
 });
 
@@ -72,6 +72,7 @@ exports.deleteRoom = CatchAsync(async(req, res, next) => {
 exports.getAllRooms = CatchAsync(async(req, res, next) => {
   
   const allRoomsData = await Rooms.find();
+  
   if (!allRoomsData || allRoomsData.length === 0) {
     return next(new AppError('No rooms found', 404));
   };
