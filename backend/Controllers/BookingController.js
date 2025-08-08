@@ -52,14 +52,47 @@ exports.createBooking = CatchAsync(async (req, res, next) => {
                message: 'User not authenticated'
           });
      }
-     const userId = req.user._id; // Assuming user ID is stored in req.user
      
-     checkBookingExists(req, res, next); // Call the middleware to check for existing bookings
+     // Validate required fields
+     if (!roomId || !startDate || !endDate) {
+          return res.status(400).json({
+               status: 'fail',
+               message: 'Missing required fields'
+          });
+     }
+
+     // Check if roomId is a valid ObjectId
+     if (!mongoose.Types.ObjectId.isValid(roomId)) {
+          return res.status(400).json({
+               status: 'fail',
+               message: 'Invalid roomId'
+          });
+     }
+
+     const userId = req.user._id;
+     const start = new Date(startDate);
+     const end = new Date(endDate);
+
+     // Check for existing bookings
+     const existingBooking = await Booking.findOne({
+          roomId,
+          startDate: { $lt: end },
+          endDate: { $gt: start },
+          status: { $in: ['pending', 'confirmed'] }
+     });
+
+     if (existingBooking) {
+          return res.status(400).json({
+               status: 'fail',
+               message: 'Booking already exists for this time period'
+          });
+     }
+     
      const newBooking = await Booking.create({
           userId,
           roomId,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate)
+          startDate: start,
+          endDate: end
      });
 
      res.status(201).json({
@@ -77,7 +110,7 @@ exports.getAllBookings = CatchAsync(async (req, res, next) => {
           .filter()
           .sort()
           .limitFields()
-          .paginate();
+          .pagination();
 
      const bookings = await features.query.populate('userId', 'name email').populate('roomId', 'name price');
 
@@ -113,7 +146,7 @@ exports.updateBooking = CatchAsync(async (req, res, next) => {
           bookingId,
           req.body,
           {
-               new: true,
+               new: true,  //show new responce
                runValidators: true
           }
      );
