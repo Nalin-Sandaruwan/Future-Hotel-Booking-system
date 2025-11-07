@@ -1,0 +1,24 @@
+// const express = require('express');
+// const RoomController = require('../Controllers/RoomController');
+
+// const router = express.Router();
+
+// router.route('/:id').get(RoomController.getRoomByID);
+// module.exports = router;
+const express = require('express');
+const RoomController = require('../Controllers/RoomController');
+const AuthMiddleware = require('../Utili/AuthMiddelware');
+
+const router = express.Router();
+
+router.route('/')
+     .post(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin') , RoomController.createRoom)
+     .get( RoomController.getAllRooms);
+     // Ensure the JWT is included in the Authorization header with the Bearer scheme when making a POST request to this route.
+
+router.route('/:id')
+     .get(AuthMiddleware.protect, AuthMiddleware.restrictTo('user','admin' ), RoomController.getRoomByID)
+     .patch(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.updateRoom)
+     .delete(AuthMiddleware.protect, AuthMiddleware.restrictTo('admin'), RoomController.deleteRoom)
+
+module.exports = router;
