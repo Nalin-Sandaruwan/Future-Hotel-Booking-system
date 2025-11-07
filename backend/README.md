@@ -10,6 +10,7 @@ A comprehensive RESTful API for hotel booking management system built with Node.
 - [Environment Variables](#environment-variables)
 - [API Endpoints](#api-endpoints)
 - [Authentication](#authentication)
+- [Frontend Integration with Axios](#frontend-integration-with-axios)
 - [Error Handling](#error-handling)
 - [Usage Examples](#usage-examples)
 
@@ -408,6 +409,616 @@ Authorization: Bearer <your_jwt_token>
 ### Role-based Access
 - **User**: Can view rooms, create bookings, manage payments
 - **Admin**: Full access to all endpoints including room management
+
+## 🌐 Frontend Integration with Axios
+
+This section explains how to integrate your frontend application with the backend API using Axios for HTTP requests and authentication.
+
+### 📦 Installation
+
+First, install Axios in your frontend project:
+
+```bash
+# For React/Vue/Angular
+npm install axios
+
+# For React with additional features
+npm install axios react-cookie
+```
+
+### ⚙️ Axios Configuration
+
+Create an Axios instance with default configuration:
+
+```javascript
+// api/config.js
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+// Create axios instance
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  withCredentials: true, // Important for cookies
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for token refresh
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/users/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
+
+        const newToken = refreshResponse.data.token;
+        localStorage.setItem('accessToken', newToken);
+        
+        // Retry the original request
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
+```
+
+### 🔐 Authentication Service
+
+Create a service for authentication operations:
+
+```javascript
+// services/authService.js
+import apiClient from '../api/config';
+
+class AuthService {
+  // User Registration
+  async signup(userData) {
+    try {
+      const response = await apiClient.post('/users/sign-up', userData);
+      
+      if (response.data.token) {
+        localStorage.setItem('accessToken', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+      }
+      
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Registration failed');
+    }
+  }
+
+  // User Login
+  async login(credentials) {
+    try {
+      const response = await apiClient.post('/users/login', credentials);
+      
+      if (response.data.token) {
+        localStorage.setItem('accessToken', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+      }
+      
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Login failed');
+    }
+  }
+
+  // Refresh Token
+  async refreshToken() {
+    try {
+      const response = await apiClient.post('/users/refresh-token');
+      
+      if (response.data.token) {
+        localStorage.setItem('accessToken', response.data.token);
+      }
+      
+      return response.data;
+    } catch (error) {
+      throw new Error('Token refresh failed');
+    }
+  }
+
+  // Logout
+  async logout() {
+    try {
+      await apiClient.post('/users/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+    }
+  }
+
+  // Forgot Password
+  async forgotPassword(email) {
+    try {
+      const response = await apiClient.post('/users/forget-password', { email });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to send reset email');
+    }
+  }
+
+  // Reset Password
+  async resetPassword(token, password) {
+    try {
+      const response = await apiClient.post('/users/reset-password', {
+        token,
+        password
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Password reset failed');
+    }
+  }
+
+  // Get Current User
+  getCurrentUser() {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return !!localStorage.getItem('accessToken');
+  }
+}
+
+export default new AuthService();
+```
+
+### 🏠 Room Service
+
+Service for room-related operations:
+
+```javascript
+// services/roomService.js
+import apiClient from '../api/config';
+
+class RoomService {
+  // Get all rooms with filters
+  async getRooms(params = {}) {
+    try {
+      const response = await apiClient.get('/rooms', { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch rooms');
+    }
+  }
+
+  // Get single room
+  async getRoom(id) {
+    try {
+      const response = await apiClient.get(`/rooms/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch room');
+    }
+  }
+
+  // Create room (Admin only)
+  async createRoom(roomData) {
+    try {
+      const response = await apiClient.post('/rooms', roomData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to create room');
+    }
+  }
+
+  // Update room (Admin only)
+  async updateRoom(id, roomData) {
+    try {
+      const response = await apiClient.patch(`/rooms/${id}`, roomData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update room');
+    }
+  }
+
+  // Delete room (Admin only)
+  async deleteRoom(id) {
+    try {
+      const response = await apiClient.delete(`/rooms/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to delete room');
+    }
+  }
+}
+
+export default new RoomService();
+```
+
+### 📅 Booking Service
+
+Service for booking operations:
+
+```javascript
+// services/bookingService.js
+import apiClient from '../api/config';
+
+class BookingService {
+  // Create booking
+  async createBooking(bookingData) {
+    try {
+      const response = await apiClient.post('/bookings', bookingData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to create booking');
+    }
+  }
+
+  // Get user bookings
+  async getUserBookings() {
+    try {
+      const response = await apiClient.get('/bookings');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch bookings');
+    }
+  }
+
+  // Get single booking
+  async getBooking(id) {
+    try {
+      const response = await apiClient.get(`/bookings/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch booking');
+    }
+  }
+
+  // Update booking
+  async updateBooking(id, updateData) {
+    try {
+      const response = await apiClient.patch(`/bookings/${id}`, updateData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update booking');
+    }
+  }
+
+  // Cancel booking
+  async cancelBooking(id) {
+    try {
+      const response = await apiClient.delete(`/bookings/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to cancel booking');
+    }
+  }
+}
+
+export default new BookingService();
+```
+
+### 💳 Payment Service
+
+Service for payment operations:
+
+```javascript
+// services/paymentService.js
+import apiClient from '../api/config';
+
+class PaymentService {
+  // Create payment
+  async createPayment(paymentData) {
+    try {
+      const response = await apiClient.post('/payments', paymentData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Payment failed');
+    }
+  }
+
+  // Get payment details
+  async getPayment(id) {
+    try {
+      const response = await apiClient.get(`/payments/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch payment');
+    }
+  }
+
+  // Get user payments
+  async getUserPayments() {
+    try {
+      const response = await apiClient.get('/payments');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch payments');
+    }
+  }
+}
+
+export default new PaymentService();
+```
+
+### 🔧 React Hook Examples
+
+Custom hooks for easier state management:
+
+```javascript
+// hooks/useAuth.js
+import { useState, useEffect } from 'react';
+import authService from '../services/authService';
+
+export const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
+    setLoading(false);
+  }, []);
+
+  const login = async (credentials) => {
+    setLoading(true);
+    try {
+      const response = await authService.login(credentials);
+      setUser(response.data.user);
+      return response;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await authService.logout();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (userData) => {
+    setLoading(true);
+    try {
+      const response = await authService.signup(userData);
+      setUser(response.data.user);
+      return response;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    user,
+    loading,
+    login,
+    logout,
+    signup,
+    isAuthenticated: authService.isAuthenticated(),
+  };
+};
+```
+
+### 📱 React Component Examples
+
+#### Login Component
+```javascript
+// components/Login.jsx
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+
+const Login = () => {
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const { login, loading } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      await login(credentials);
+      // Redirect to dashboard or home page
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <div className="error">{error}</div>}
+      
+      <input
+        type="email"
+        placeholder="Email"
+        value={credentials.email}
+        onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+        required
+      />
+      
+      <input
+        type="password"
+        placeholder="Password"
+        value={credentials.password}
+        onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+        required
+      />
+      
+      <button type="submit" disabled={loading}>
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
+    </form>
+  );
+};
+
+export default Login;
+```
+
+#### Rooms List Component
+```javascript
+// components/RoomsList.jsx
+import React, { useState, useEffect } from 'react';
+import roomService from '../services/roomService';
+
+const RoomsList = () => {
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await roomService.getRooms();
+        setRooms(response.data.rooms);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  if (loading) return <div>Loading rooms...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div className="rooms-grid">
+      {rooms.map(room => (
+        <div key={room._id} className="room-card">
+          <h3>{room.name}</h3>
+          <p>Type: {room.type}</p>
+          <p>Price: ${room.price}/night</p>
+          <p>Capacity: {room.capacity} guests</p>
+          <button onClick={() => bookRoom(room._id)}>
+            Book Now
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default RoomsList;
+```
+
+### 🚨 Error Handling Best Practices
+
+```javascript
+// utils/errorHandler.js
+export const handleApiError = (error) => {
+  if (error.response) {
+    // Server responded with error status
+    const message = error.response.data?.message || 'Something went wrong';
+    const status = error.response.status;
+    
+    switch (status) {
+      case 401:
+        // Redirect to login
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+        break;
+      case 403:
+        // Show permission denied message
+        return 'You do not have permission to perform this action';
+      case 404:
+        return 'Resource not found';
+      case 500:
+        return 'Server error. Please try again later';
+      default:
+        return message;
+    }
+  } else if (error.request) {
+    // Request was made but no response received
+    return 'Network error. Please check your connection';
+  } else {
+    // Something else happened
+    return error.message || 'An unexpected error occurred';
+  }
+};
+```
+
+### 🛡️ Protected Route Component
+
+```javascript
+// components/ProtectedRoute.jsx
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+
+const ProtectedRoute = ({ children, adminRequired = false }) => {
+  const { user, loading, isAuthenticated } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (adminRequired && user?.role !== 'admin') {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;
+```
+
+### 📝 Usage Tips
+
+1. **Token Storage**: Store access tokens in localStorage for persistence across browser sessions
+2. **Automatic Refresh**: The Axios interceptor automatically handles token refresh
+3. **Error Handling**: Always wrap API calls in try-catch blocks
+4. **Loading States**: Show loading indicators during API requests
+5. **Logout Cleanup**: Clear all stored data when user logs out
+
+### 🔗 Environment Variables for Frontend
+
+```javascript
+// .env (Frontend)
+REACT_APP_API_URL=http://localhost:3000/api/v1
+REACT_APP_STRIPE_PUBLIC_KEY=your_stripe_public_key
+```
+
+This setup provides a robust foundation for integrating your React/Vue/Angular frontend with the hotel booking backend API!
 
 ## 🛡️ Error Handling
 
