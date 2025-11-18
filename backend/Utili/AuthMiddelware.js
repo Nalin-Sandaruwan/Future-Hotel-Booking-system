@@ -11,6 +11,14 @@ exports.protect = CatchAsync(async (req, res, next) => {
      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
+    // Also check for token in cookies
+    else if (req.cookies.accessToken) {
+        token = req.cookies.accessToken;
+    }
+
+    if (!token) {
+        return next(new AppError('You are not logged in! Please log in to get access.', 401));
+    }
 
      //verify the token
      const decoded = jwt.verify(token, process.env.JWT_SECRET);

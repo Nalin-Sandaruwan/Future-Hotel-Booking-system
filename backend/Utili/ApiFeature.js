@@ -46,12 +46,17 @@ class ApiFeature {
 
   pagination(){
     //04 pagination
-  const page = this.queryString.page * 1 ;
-  const limit = this.queryString.limit * 5 ;
+  const page = this.queryString.page * 1 || 1;
+  const limit = this.queryString.limit * 1 || 10;
   const skip = (page - 1) * limit;
 
   this.query = this.query.skip(skip).limit(limit); // Corrected 'features.query' to 'this.query'
   return this; // Return this for chaining
+  }
+
+  // Alias method for backward compatibility
+  paginate(){
+    return this.pagination();
   }
 
   // Method for limiting the fields returned in the query result

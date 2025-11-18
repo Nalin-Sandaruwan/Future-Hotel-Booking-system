@@ -9,28 +9,48 @@ const sendEmail = require('../Utili/Email');
 const createToken = (userId) => {
      const playload = { userId }; // playload is obj
      const jwt_Secret = process.env.JWT_SECRET
-     return jwt.sign(playload, jwt_Secret, { expiresIn: '1h' })
+     return jwt.sign(playload, jwt_Secret, { expiresIn: '15m' }) // Short-lived access token
 }
 
+const createRefreshToken = (userId) => {
+     const playload = { userId };
+     const jwt_Secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET; // Use separate secret if available
+     return jwt.sign(playload, jwt_Secret, { expiresIn: '7d' }) // Long-lived refresh token
+}
 
-const createSendToken = (user, statusCode, res) => {
-     const token = createToken(user._id);
+const createSendToken = async (user, statusCode, res) => {
+     const accessToken = createToken(user._id);
+     const refreshToken = createRefreshToken(user._id);
+     
+     // Store refresh token in database
+     user.refreshToken = refreshToken;
+     await user.save({ validateBeforeSave: false });
+     
      const cookieOptions = {
           httpOnly: true,
-          secure: false, // only send over HTTPS
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+          secure: false, // only send over HTTPS in production
+          maxAge: 1000 * 60 * 15, // 15 minutes for access token
+          sameSite: 'lax'
+     };
+     
+     const refreshCookieOptions = {
+          httpOnly: true,
+          secure: false, // only send over HTTPS in production
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days for refresh token
           sameSite: 'lax'
      };
 
-     res.cookie('jwtToken', token, cookieOptions);
+     res.cookie('accessToken', accessToken, cookieOptions);
+     res.cookie('refreshToken', refreshToken, refreshCookieOptions);
 
-     // Remove password from output
+     // Remove password and refreshToken from output
      user.password = undefined;
-     console.log(cookieOptions);
+     user.refreshToken = undefined;
 
      res.status(statusCode).json({
           status: 'success',
-          token,
+          accessToken,
+          refreshToken,
           data: {
                user
           }
@@ -61,7 +81,7 @@ exports.signup = CatchAsync(async (req, res, next) => {
           password: hashedPassword
      })
 
-     createSendToken(newUser, 201, res)
+     await createSendToken(newUser, 201, res)
 
 })
 
@@ -85,7 +105,7 @@ exports.login = CatchAsync(async (req, res, next) => {
      }
 
 
-     createSendToken(user, 200, res)
+     await createSendToken(user, 200, res)
 
 
 })
@@ -176,5 +196,74 @@ exports.resetPassword = CatchAsync(async (req, res, next) => {
      res.status(200).json({
           status: 'success',
           message: 'Password reset successfully'
+     });
+});
+
+// Refresh Token
+exports.refreshToken = CatchAsync(async (req, res, next) => {
+     const { refreshToken } = req.cookies || req.body;
+
+     if (!refreshToken) {
+          return next(new AppError('Refresh token not provided', 401));
+     }
+
+     try {
+          const jwt_Secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+          const decoded = jwt.verify(refreshToken, jwt_Secret);
+          
+          const user = await User.findById(decoded.userId);
+          if (!user || user.refreshToken !== refreshToken) {
+               return next(new AppError('Invalid refresh token', 401));
+          }
+
+          // Generate new access token
+          const newAccessToken = createToken(user._id);
+          
+          const cookieOptions = {
+               httpOnly: true,
+               secure: false, // only send over HTTPS in production
+               maxAge: 1000 * 60 * 15, // 15 minutes
+               sameSite: 'lax'
+          };
+
+          res.cookie('accessToken', newAccessToken, cookieOptions);
+
+          res.status(200).json({
+               status: 'success',
+               accessToken: newAccessToken,
+               message: 'Access token refreshed successfully'
+          });
+
+     } catch (error) {
+          return next(new AppError('Invalid refresh token', 401));
+     }
+});
+
+// Logout
+exports.logout = CatchAsync(async (req, res, next) => {
+     const { refreshToken } = req.cookies || req.body;
+
+     if (refreshToken) {
+          // Find user and remove refresh token from database
+          const jwt_Secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+          try {
+               const decoded = jwt.verify(refreshToken, jwt_Secret);
+               const user = await User.findById(decoded.userId);
+               if (user) {
+                    user.refreshToken = null;
+                    await user.save({ validateBeforeSave: false });
+               }
+          } catch (error) {
+               // Token might be invalid, but we still proceed with logout
+          }
+     }
+
+     // Clear cookies
+     res.clearCookie('accessToken');
+     res.clearCookie('refreshToken');
+
+     res.status(200).json({
+          status: 'success',
+          message: 'Logged out successfully'
      });
 });

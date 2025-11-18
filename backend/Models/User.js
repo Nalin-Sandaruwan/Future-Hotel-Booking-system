@@ -33,6 +33,10 @@ const UserSchema = new mongoose.Schema({
      },
      resetCode:String,
      resetExpires:Date,
+     refreshToken: {
+          type: String,
+          default: null
+     },
 
 
 })

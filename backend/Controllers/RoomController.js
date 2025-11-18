@@ -59,13 +59,22 @@ exports.updateRoom = CatchAsync(async(req, res, next)=>{
 // delete room 
 exports.deleteRoom = CatchAsync(async(req, res, next) => {
   const roomId = req.params.id;
-  const foundedRoom = await Rooms.findByIdAndDelete(roomId)
-
-  const deletedRoom = await Rooms.findById(roomId)
-
-  if (deletedRoom) {
-    return next(new AppError('Not deleted the room data', 400))
+  
+  // Validate ObjectId format before querying
+  if (!roomId || !mongoose.Types.ObjectId.isValid(roomId)) {
+    return next(new AppError('Invalid Room ID format', 400));
   }
+
+  const deletedRoom = await Rooms.findByIdAndDelete(roomId);
+
+  if (!deletedRoom) {
+    return next(new AppError('No room found with that ID', 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
 });
 
 // get all room
