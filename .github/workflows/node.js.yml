@@ -39,5 +39,10 @@ jobs:
         echo "${{ secrets.STRIPE_WEBHOOK_SECRET }}" > .env
       working-directory: backend
 
-    - run: pm2 restart BackendAPI
+    - run: |
+        if pm2 describe BackendAPI > /dev/null 2>&1; then
+          pm2 restart BackendAPI --update-env
+        else
+          pm2 start index.js --name BackendAPI --update-env
+        fi
       working-directory: backend
