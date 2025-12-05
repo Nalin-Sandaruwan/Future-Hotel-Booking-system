@@ -46,3 +46,5 @@ jobs:
           pm2 start index.js --name BackendAPI --update-env
         fi
       working-directory: backend
+
+    - run: pm2 restart api
