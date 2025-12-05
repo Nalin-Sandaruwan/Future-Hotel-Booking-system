@@ -26,7 +26,7 @@ const createSendToken = async (user, statusCode, res) => {
      user.refreshToken = refreshToken;
      await user.save({ validateBeforeSave: false });
      
-     const cookieOptions = {
+     const cookieOptions = {            
           httpOnly: true,
           secure: false, // only send over HTTPS in production
           maxAge: 1000 * 60 * 15, // 15 minutes for access token
@@ -59,7 +59,9 @@ const createSendToken = async (user, statusCode, res) => {
 
 
 exports.signup = CatchAsync(async (req, res, next) => {
+
      const { name, email, password, confirmPassword } = req.body;
+
      if (!name || !email || !password || !confirmPassword) {
           return next(new AppError('All fields are required', 400));
      }

@@ -7,8 +7,8 @@ const globalErrorHandler = require('./Controllers/ErrorController');
 
 // Handle uncaught exceptions
 process.on('uncaughtException', err => {
-  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
+  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.error(err && err.stack ? err.stack : err);
   process.exit(1);
 });
 
@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // DB CONNECTION
-const DB = process.env.DATABASE || 'mongodb://localhost:27017/Hottel-Booking';
+const DB = process.env.DATABASE || 'mongodb+srv://nalin2:XVQcShoO6CQQaSpy@goveecare.ehyrjbi.mongodb.net/?appName=goveEcare';
 mongoose
   .connect(DB)
   .then(() => console.log('DB connection successful!'))
@@ -34,6 +34,12 @@ const RoomsRouter = require('./Routers/RoomsRouter');
 const BookingRouter = require('./Routers/BookingRouters');
 const UserRouter = require('./Routers/UserRoutes');
 const PaymentRouter = require('./Routers/PaymentRouter');
+
+// Debug: print types to catch which required module is not a middleware/router function
+console.log('RoomsRouter type:', typeof RoomsRouter);
+console.log('BookingRouter type:', typeof BookingRouter);
+console.log('UserRouter type:', typeof UserRouter);
+console.log('PaymentRouter type:', typeof PaymentRouter);
 
 app.use('/api/v1/rooms', RoomsRouter);
 app.use('/api/v1/users', UserRouter);

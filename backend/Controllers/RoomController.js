@@ -37,7 +37,7 @@ exports.createRoom = CatchAsync(async (req, res, next) => {
     if (!newRoom) {
         return next(new AppError('Failed to create room', 400));
     }
-
+ 
     // If the room is created successfully, return it in the response
     res.status(201).json({
         status: 'success',
