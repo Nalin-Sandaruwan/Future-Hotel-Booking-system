@@ -26,8 +26,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
     - run: npm ci
-    - run: | 
+      working-directory: backend
+    - run: |
         touch .env
         echo "${{ secrets.JWT_REFRESH_SECRET }}" > .env
         echo "${{ secrets.JWT_SECRET }}" > .env
@@ -35,5 +37,7 @@ jobs:
         echo "${{ secrets.PORT }}" > .env
         echo "${{ secrets.STRIPE_SECRET_KEY }}" > .env
         echo "${{ secrets.STRIPE_WEBHOOK_SECRET }}" > .env
+      working-directory: backend
 
     - run: pm2 restart BackendAPI
+      working-directory: backend
