@@ -29,6 +29,8 @@ jobs:
         cache-dependency-path: backend/package-lock.json
     - run: npm ci
       working-directory: backend
+    - name: Install PM2
+      run: npm install -g pm2
     - run: |
         touch .env
         echo "${{ secrets.JWT_REFRESH_SECRET }}" > .env
@@ -37,6 +39,16 @@ jobs:
         echo "${{ secrets.PORT }}" > .env
         echo "${{ secrets.STRIPE_SECRET_KEY }}" > .env
         echo "${{ secrets.STRIPE_WEBHOOK_SECRET }}" > .env
+      working-directory: backend
+
+    - name: PM2 diagnostics
+      run: |
+        echo "PM2 version (if installed):" || true
+        pm2 -v || true
+        echo "pm2 location:" || true
+        which pm2 || command -v pm2 || true
+        echo "Dumping ~/.pm2 directory listing (if exists):" || true
+        ls -la ~/.pm2 || true
       working-directory: backend
 
     - run: |
