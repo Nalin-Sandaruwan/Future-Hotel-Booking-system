@@ -63,4 +63,4 @@ jobs:
         fi
       working-directory: backend
 
-    - run: npx -y pm2 restart api || true
+    - run: npx -y pm2 restart apiServer || true
