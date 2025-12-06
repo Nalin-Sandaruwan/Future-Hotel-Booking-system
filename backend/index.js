@@ -41,7 +41,7 @@ console.log('BookingRouter type:', typeof BookingRouter);
 console.log('UserRouter type:', typeof UserRouter);
 console.log('PaymentRouter type:', typeof PaymentRouter);
 
-app.use('/api/v1/rooms', RoomsRouter);
+// app.use('/api/v1/rooms', RoomsRouter);
 app.use('/api/v1/users', UserRouter);
 app.use('/api/v1/bookings', BookingRouter);
 app.use('/api/v1/payments', PaymentRouter);
