@@ -29,8 +29,8 @@ jobs:
         cache-dependency-path: backend/package-lock.json
     - run: npm ci
       working-directory: backend
-    - name: Install PM2
-      run: npm install -g pm2
+    - name: Install PM2 (optional)
+      run: npm install -g pm2 || true
     - run: |
         touch .env
         echo "${{ secrets.JWT_REFRESH_SECRET }}" > .env
@@ -43,20 +43,24 @@ jobs:
 
     - name: PM2 diagnostics
       run: |
-        echo "PM2 version (if installed):" || true
+        echo "PM2 version (global, if installed):" || true
         pm2 -v || true
+        echo "npx pm2 version (fetched):" || true
+        npx -y pm2 -v || true
         echo "pm2 location:" || true
         which pm2 || command -v pm2 || true
+        echo "npm global bin:" || true
+        npm bin -g || true
         echo "Dumping ~/.pm2 directory listing (if exists):" || true
         ls -la ~/.pm2 || true
       working-directory: backend
 
     - run: |
-        if pm2 describe BackendAPI > /dev/null 2>&1; then
-          pm2 restart BackendAPI --update-env
+        if npx -y pm2 describe BackendAPI > /dev/null 2>&1; then
+          npx -y pm2 restart BackendAPI --update-env
         else
-          pm2 start index.js --name BackendAPI --update-env
+          npx -y pm2 start index.js --name BackendAPI --update-env
         fi
       working-directory: backend
 
-    - run: pm2 restart api
+    - run: npx -y pm2 restart api || true
