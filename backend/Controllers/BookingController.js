@@ -29,9 +29,12 @@ exports.checkBookingExists = CatchAsync(async (req, res, next) => {
 
      const existingBooking = await Booking.findOne({
           roomId,
+          /* In the code snippet provided, `startDate: { : end },` is a query condition used to
+          check if the `startDate` of an existing booking is less than the `end` date provided in
+          the request. */
           startDate: { $lt: end },
           endDate: { $gt: start },
-          status: { $in: ['pending', 'confirmed'] }
+          // status: { $in: ['pending', 'confirmed'] }
      });
 
      if ( existingBooking ) {
