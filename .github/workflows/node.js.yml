@@ -1,0 +1,67 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    - run: npm ci
+      working-directory: backend
+    - name: Install PM2 (optional)
+      run: npm install -g pm2 || true
+    - run: |
+        cat > .env <<EOF
+        JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NODE_ENV=${{ secrets.NODE_ENV }}
+        PORT=${{ secrets.PORT }}
+        STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+        STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        EOF
+      working-directory: backend
+
+    - name: PM2 diagnostics
+      run: |
+        echo "PM2 version (global, if installed):" || true
+        pm2 -v || true
+        echo "npx pm2 version (fetched):" || true
+        npx -y pm2 -v || true
+        echo "pm2 location:" || true
+        which pm2 || command -v pm2 || true
+        echo "npm global bin:" || true
+        npm bin -g || true
+        echo "Dumping ~/.pm2 directory listing (if exists):" || true
+        ls -la ~/.pm2 || true
+      working-directory: backend
+
+    - run: |
+        if npx -y pm2 describe BackendAPI > /dev/null 2>&1; then
+          npx -y pm2 restart BackendAPI --update-env
+        else
+          npx -y pm2 start index.js --name BackendAPI --update-env
+        fi
+      working-directory: backend
+
+    - run: npx -y pm2 restart BackendAPI || true
