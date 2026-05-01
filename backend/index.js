@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const AppError = require('./Utili/AppError');
 const globalErrorHandler = require('./Controllers/ErrorController');
 
@@ -13,6 +14,12 @@ process.on('uncaughtException', err => {
 });
 
 const app = express();
+
+// 1) GLOBAL MIDDLEWARES
+app.use(cors({
+  origin: true, // Allow all origins for now, or specify your frontend URL
+  credentials: true
+}));
 
 // Load env variables
 dotenv.config({ path: './config.env' });

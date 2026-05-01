@@ -11,6 +11,7 @@ const createToken = (userId) => {
      const jwt_Secret = process.env.JWT_SECRET
      return jwt.sign(playload, jwt_Secret, { expiresIn: '15m' }) // Short-lived access token
 }
+exports.createToken = createToken;
 
 const createRefreshToken = (userId) => {
      const playload = { userId };
@@ -49,8 +50,6 @@ const createSendToken = async (user, statusCode, res) => {
 
      res.status(statusCode).json({
           status: 'success',
-          accessToken,
-          refreshToken,
           data: {
                user
           }
@@ -267,5 +266,19 @@ exports.logout = CatchAsync(async (req, res, next) => {
      res.status(200).json({
           status: 'success',
           message: 'Logged out successfully'
+     });
+});
+
+exports.getMe = CatchAsync(async (req, res, next) => {
+     // Exclude sensitive fields
+     const user = req.user;
+     user.password = undefined;
+     user.refreshToken = undefined;
+     
+     res.status(200).json({
+          status: 'success',
+          data: {
+               user
+          }
      });
 });
