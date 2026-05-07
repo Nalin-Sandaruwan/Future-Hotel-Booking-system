@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Coastal Cove Base Tokens */
+  --bg-base: #F5F5F3;
+  --bg-surface: #E8E8E3;
+  --text-primary: #1A1A1A;
+  --text-muted: #6B6B6B;
+  --accent-primary: #2e1c05;
+  --border-default: #D1D1CB;
+  --state-error: #991B1B;
+  --state-success: #166534;
+
+  /* Shadcn UI Mapping */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--text-primary);
+  --primary-foreground: var(--bg-base);
+  --secondary: var(--bg-surface);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--text-muted);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--accent-primary);
+  --accent-foreground: #ffffff;
+  --destructive: #991B1B;
+  --destructive-foreground: #ffffff;
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--accent-primary);
+  
+  /* Border Radius - Unified */
+  --radius: 12px;
+  --radius-sm: 8px;   /* rounded-lg */
+  --radius-md: 16px;  /* rounded-2xl */
+  --radius-lg: 24px;  /* rounded-3xl */
+}
+
+@theme inline {
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-accent: var(--accent-primary);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border-default);
+
+  --font-main: var(--font-hanken);
+  --font-sec: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  
+  /* Shadcn Theme Overrides */
+  --color-primary: var(--text-primary);
+  --color-primary-foreground: var(--bg-base);
+  --color-accent: var(--accent-primary);
+  --color-accent-foreground: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-hanken), serif;
+    @apply font-black italic;
+  }
+}
+
+/* Custom Animations */
+@keyframes slow-zoom {
+  from { transform: scale(1.05); }
+  to { transform: scale(1); }
+}
+
+.animate-slow-zoom {
+  animation: slow-zoom 20s ease-out infinite alternate;
+}

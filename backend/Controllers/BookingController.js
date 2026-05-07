@@ -1,4 +1,5 @@
 const Booking = require('../Models/Booking');
+const Room = require('../Models/Rooms');  
 const CatchAsync = require('../Utili/CatchAsync');
 const APIFeatures = require('../Utili/ApiFeature');
 const AppError = require('../Utili/AppError');
@@ -47,64 +48,62 @@ exports.checkBookingExists = CatchAsync(async (req, res, next) => {
 })
 
 exports.createBooking = CatchAsync(async (req, res, next) => {
-     const { roomId, startDate, endDate } = req.body;
+    const { roomId, startDate, endDate } = req.body;
 
-     if (!req.user) {
-          return res.status(401).json({
-               status: 'fail',
-               message: 'User not authenticated'
-          });
-     }
-     
-     // Validate required fields
-     if (!roomId || !startDate || !endDate) {
-          return res.status(400).json({
-               status: 'fail',
-               message: 'Missing required fields'
-          });
-     }
+    // 1) Basic validation
+    if (!roomId || !startDate || !endDate) {
+        return next(new AppError('Please provide roomId, startDate, and endDate', 400));
+    }
 
-     // Check if roomId is a valid ObjectId
-     if (!mongoose.Types.ObjectId.isValid(roomId)) {
-          return res.status(400).json({
-               status: 'fail',
-               message: 'Invalid roomId'
-          });
-     }
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Reset time for date-only comparison
 
-     const userId = req.user._id;
-     const start = new Date(startDate);
-     const end = new Date(endDate);
+    // 2) Logical Date Validation
+    if (start < now) {
+        return next(new AppError('Booking start date cannot be in the past', 400));
+    }
+    if (end <= start) {
+        return next(new AppError('End date must be after the start date', 400));
+    }
 
-     // Check for existing bookings
-     const existingBooking = await Booking.findOne({
-          roomId,
-          startDate: { $lt: end },
-          endDate: { $gt: start },
-          status: { $in: ['pending', 'confirmed'] }
-     });
+    // 3) Verify Room Exists
+    const room = await Room.findById(roomId);
+    if (!room) {
+        return next(new AppError('No room found with that ID', 404));
+    }
 
-     if (existingBooking) {
-          return res.status(400).json({
-               status: 'fail',
-               message: 'Booking already exists for this time period'
-          });
-     }
-     
-     const newBooking = await Booking.create({
-          userId,
-          roomId,
-          startDate: start,
-          endDate: end
-     });
+    // 4) Check for Overlapping Bookings
+    const existingBooking = await Booking.findOne({
+        roomId,
+        status: { $in: ['pending', 'confirmed'] },
+        $or: [
+            { startDate: { $lt: end, $gte: start } }, // Existing starts during new
+            { endDate: { $gt: start, $lte: end } },   // Existing ends during new
+            { startDate: { $lte: start }, endDate: { $gte: end } } // New is inside existing
+        ]
+    });
 
-     res.status(201).json({
-          status: 'success',
-          data: {
-               booking: newBooking
-          }
-     });
+    if (existingBooking) {
+        return next(new AppError('This room is already booked for the selected dates', 400));
+    }
+
+    // 5) Create Booking
+    const newBooking = await Booking.create({
+        userId: req.user._id,
+        roomId,
+        startDate: start,
+        endDate: end
+        // Consider adding: totalPrice: room.price * days
+    });
+
+    res.status(201).json({
+        status: 'success',
+        data: { booking: newBooking }
+    });
 });
+
 
 exports.getAllBookings = CatchAsync(async (req, res, next) => {
      // Assuming you have a utility class for API features
