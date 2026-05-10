@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 export default function InfiniteGallery() {
   const images = [
     { src: "/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg", aspect: "aspect-[4/5]", width: "w-[300px] md:w-[450px]" },
-    { src: "/luxury_hotel_hero_1777681407690.png", aspect: "aspect-square", width: "w-[300px] md:w-[400px]" },
-    { src: "/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg", aspect: "aspect-[3/2]", width: "w-[400px] md:w-[600px]" },
+    { src: "/image/frames-for-your-heart-zSG-kd-L6vw-unsplash.jpg", aspect: "aspect-square", width: "w-[300px] md:w-[400px]" },
+    { src: "/image/michael-brown-bZZ-YKRvRF0-unsplash.jpg", aspect: "aspect-[3/2]", width: "w-[400px] md:w-[600px]" },
     { src: "/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg", aspect: "aspect-[4/5]", width: "w-[300px] md:w-[450px]" },
-    { src: "/luxury_hotel_hero_1777681407690.png", aspect: "aspect-square", width: "w-[300px] md:w-[400px]" },
+    { src: "/image/frames-for-your-heart-zSG-kd-L6vw-unsplash.jpg", aspect: "aspect-square", width: "w-[300px] md:w-[400px]" },
   ];
 
   // Duplicate for infinite loop
@@ -41,6 +41,7 @@ export default function InfiniteGallery() {
               src={img.src}
               alt={`Gallery Image ${index}`}
               fill
+              sizes="(max-width: 768px) 300px, 600px"
               className="object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[20%] group-hover:grayscale-0"
             />
             {/* Soft Overlay */}

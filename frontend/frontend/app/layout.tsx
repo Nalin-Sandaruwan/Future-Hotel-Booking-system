@@ -25,8 +25,47 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Coastal Cove | Luxury Hotel & Resort",
-  description: "Experience tranquility and luxury at Coastal Cove. Book your stay at the finest island retreat.",
+  metadataBase: new URL('https://coastalcove.com'),
+  title: {
+    default: "Coastal Cove | Luxury Hotel & Resort",
+    template: "%s | Coastal Cove"
+  },
+  description: "Experience architectural tranquility and luxury at Coastal Cove. Discover our curated suites, holistic wellness sanctuary, and the pinnacle of island hospitality.",
+  keywords: ["Luxury Hotel", "Coastal Resort", "Architectural Suites", "Boutique Hotel", "Island Retreat", "Wellness Spa"],
+  authors: [{ name: "Coastal Cove Architecture Team" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://coastalcove.com",
+    siteName: "Coastal Cove Luxury Residences",
+    title: "Coastal Cove | A Sanctuary of Stillness",
+    description: "Architectural purity meets organic warmth on the edge of the island.",
+    images: [
+      {
+        url: "/image/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Coastal Cove Luxury Resort"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Coastal Cove | Luxury Hotel & Resort",
+    description: "Discover the pinnacle of island hospitality and architectural tranquility.",
+    images: ["/image/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -37,9 +76,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", hanken.variable, inter.variable, playfair.variable, "font-sans", geist.variable)}
     >
-      <body className="min-h-full flex flex-col selection:bg-accent selection:text-white">
+      <body suppressHydrationWarning className="min-h-full flex flex-col selection:bg-accent selection:text-white">
         {children}
       </body>
     </html>

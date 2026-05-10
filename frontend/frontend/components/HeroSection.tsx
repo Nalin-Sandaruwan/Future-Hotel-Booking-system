@@ -57,6 +57,7 @@ export default function HeroSection() {
           src="/image/michael-brown-bZZ-YKRvRF0-unsplash.jpg"
           alt="Luxury Coastal Horizon"
           fill
+          sizes="100vw"
           className="object-cover brightness-[0.7] scale-110"
           priority
         />
