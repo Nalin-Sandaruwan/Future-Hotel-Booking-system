@@ -1,15 +1,38 @@
-import Image from "next/image";
+"use client";
+
+import SuiteCard from "./SuiteCard";
 
 export default function FeaturedRooms() {
   const rooms = [
-    { id: 1, name: "Oceanic Retreat", price: 540, type: "Premium Suite" },
-    { id: 2, name: "Coastal Haven", price: 620, type: "Luxury Suite" },
-    { id: 3, name: "Island Sanctuary", price: 750, type: "Presidential" },
+    { 
+      id: 1, 
+      name: "Oceanic Retreat", 
+      price: 540, 
+      category: "Premium Suite",
+      image: "/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg",
+      description: "A panoramic escape featuring floor-to-ceiling glass and artisanal linen textures."
+    },
+    { 
+      id: 2, 
+      name: "Coastal Haven", 
+      price: 620, 
+      category: "Luxury Suite",
+      image: "/image/frames-for-your-heart-zSG-kd-L6vw-unsplash.jpg",
+      description: "Architectural purity meets organic warmth in this secluded beachfront sanctuary."
+    },
+    { 
+      id: 3, 
+      name: "Island Sanctuary", 
+      price: 750, 
+      category: "Presidential",
+      image: "/image/michael-brown-bZZ-YKRvRF0-unsplash.jpg",
+      description: "The pinnacle of Coastal Cove luxury, featuring private concierge and infinite views."
+    },
   ];
 
   return (
     <section className="py-60 bg-surface/30">
-      <div className="container mx-auto px-12">
+      <div className="max-w-7xl mx-auto px-12">
         {/* Standardized Header */}
         <div className="flex flex-col items-center text-center mb-40 max-w-5xl mx-auto">
           <span className="text-[12px] font-main font-black tracking-[0.5em] text-accent-primary uppercase mb-12">
@@ -23,22 +46,8 @@ export default function FeaturedRooms() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-          {rooms.map((room) => (
-            <div key={room.id} className="group cursor-pointer">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl mb-8">
-                <Image
-                  src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg"
-                  alt={room.name}
-                  fill
-                  className="object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                />
-                <div className="absolute top-8 left-8 px-5 py-1.5 bg-black/40 backdrop-blur-md rounded-lg text-[10px] text-white font-extrabold uppercase tracking-widest">
-                  {room.type}
-                </div>
-              </div>
-              <h3 className="text-3xl font-main font-bold text-primary mb-3 uppercase tracking-tighter">{room.name}</h3>
-              <p className="text-[13px] font-sec text-accent font-extrabold uppercase tracking-[0.2em]">${room.price} / NIGHT</p>
-            </div>
+          {rooms.map((room, index) => (
+            <SuiteCard key={room.id} suite={room} index={index} />
           ))}
         </div>
       </div>

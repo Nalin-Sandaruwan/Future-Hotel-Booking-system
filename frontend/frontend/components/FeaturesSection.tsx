@@ -96,6 +96,7 @@ export default function FeaturesSection() {
               src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg"
               alt="Nature Harmony"
               fill
+              sizes="(max-width: 768px) 80vw, 40vw"
               className="object-cover hover:scale-110 transition-transform duration-[2s]"
             />
           </motion.div>

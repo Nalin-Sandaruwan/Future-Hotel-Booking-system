@@ -33,6 +33,7 @@ export default function IntroSection() {
               src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg"
               alt="Interior view"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover rounded-2xl shadow-2xl shadow-black/5 brightness-95"
             />
           </motion.div>
@@ -92,6 +93,7 @@ export default function IntroSection() {
               src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg"
               alt="Living space"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover rounded-2xl shadow-2xl shadow-black/5 brightness-90"
             />
           </motion.div>
@@ -104,14 +106,14 @@ export default function IntroSection() {
             whileInView={{ opacity: 1, y: 0 }}
             className="relative aspect-[3/4] overflow-hidden rounded-2xl"
           >
-            <Image src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg" alt="Interior" fill className="object-cover" />
+            <Image src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg" alt="Interior" fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 20 }}
             className="relative aspect-[3/4] overflow-hidden rounded-2xl"
           >
-            <Image src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg" alt="Living" fill className="object-cover" />
+            <Image src="/image/roberto-nickson-emqnSQwQQDo-unsplash.jpg" alt="Living" fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
           </motion.div>
         </div>
 

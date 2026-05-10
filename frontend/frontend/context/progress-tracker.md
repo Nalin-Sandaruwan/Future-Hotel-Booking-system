@@ -13,15 +13,18 @@ change.
 
 ## Completed
 
-- None yet.
+- **Maintenance & Stability**: Resolved hydration mismatches, missing image 404s, and Next/Image optimization warnings.
+- **Suites Showcase**: Implemented the `/suites` page with editorial-style layout, cinematic animations, and architectural imagery.
+- **Brand Story**: Implemented the `/story` page detailing the philosophy, architecture, and design ethos of Coastal Cove.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- [First unit to build]
+- **Booking Flow**: Start integration with the backend for real-time room availability.
+- **Location Section**: Detailed interactive map or location guide in the `/story` or a new page.
 
 ## Open Questions
 

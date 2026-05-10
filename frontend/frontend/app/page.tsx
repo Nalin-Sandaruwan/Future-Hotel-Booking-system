@@ -28,7 +28,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-base transition-colors duration-700">
       <Navbar />
 
-      <main>
+      <main className="relative">
         {/* Hero Section handles its own entrance animation */}
         <HeroSection />
 
